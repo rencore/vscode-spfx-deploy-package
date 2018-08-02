@@ -5,7 +5,7 @@ export class StatusBarItem extends vscode.Disposable {
 
   public set connected(c: boolean) {
     this.statusBarItem.text = c ? '$(globe) Connected' : '$(circle-slash) Disconnected';
-    this.statusBarItem.tooltip = `Rencore Deploy SPFx package extension ${(c ? '' : 'not ')}connected to SharePoint`;
+    this.statusBarItem.tooltip = `Rencore Deploy SPFx Package extension ${(c ? '' : 'not ')}connected to SharePoint`;
   }
 
   constructor() {

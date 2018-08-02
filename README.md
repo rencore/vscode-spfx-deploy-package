@@ -1,4 +1,4 @@
-# Rencore Deploy SPFx package
+# Rencore Deploy SPFx Package
 
 [![Rencore logo](./assets/rencore.png)](https://rencore.com)
 
@@ -17,7 +17,7 @@ _The extension will automatically upload the selected package to the tenant app 
 
 Connect to your SharePoint Online tenant, by specifying its URL.
 
-![The 'Rencore Deploy SPFx package' extension prompting for specifying the SharePoint URL](./assets/sharepoint-url-prompt.png)
+![The 'Rencore Deploy SPFx Package' extension prompting for specifying the SharePoint URL](./assets/sharepoint-url-prompt.png)
 
 _You can specify the URL permanently using the `rencoreSpfxDeploy.sharePointUrl` setting. When this setting is specified, you won't be prompted for the SharePoint URL._
 
@@ -27,7 +27,7 @@ _You can specify the URL permanently using the `rencoreSpfxDeploy.sharePointUrl`
 
 When connecting to your tenant, the extension uses OAuth and doesn't have access to your credentials. It can only access your tenant after you granted it permissions and signed in with your account.
 
-![The 'Rencore Deploy SPFx package' extension prompts for completing Azure AD OAuth flow](./assets/oauth-prompt.png)
+![The 'Rencore Deploy SPFx Package' extension prompts for completing Azure AD OAuth flow](./assets/oauth-prompt.png)
 
 _At any time you can revoke the extension's permissions through Azure AD applications settings._
 
@@ -38,6 +38,10 @@ At any time, check the status of your connection to SharePoint.
 ![SharePoint connection information displayed in VSCode](./assets/connection-status.png)
 
 ## Release Notes
+
+### 1.0.1
+
+Added handling error when app catalog can't be found
 
 ### 1.0.0
 

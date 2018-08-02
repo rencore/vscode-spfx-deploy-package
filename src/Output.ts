@@ -7,7 +7,7 @@ export class Output extends vscode.Disposable {
     super(() => {
       this.channel.dispose();
     });
-    this.channel = vscode.window.createOutputChannel('Rencore Deploy SPFx package');
+    this.channel = vscode.window.createOutputChannel('Rencore Deploy SPFx Package');
   }
 
   public show(preserveFocus: boolean = true): void {

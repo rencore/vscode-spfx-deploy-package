@@ -67,7 +67,12 @@ export class Utils {
         .then((res: { CorporateCatalogUrl: string; }): void => {
           console.log(res);
 
-          resolve(res.CorporateCatalogUrl);
+          if (res.CorporateCatalogUrl) {
+            resolve(res.CorporateCatalogUrl);
+          }
+          else {
+            reject(`Couldn't locate tenant app catalog`);
+          }
         }, (error: any): void => {
           reject(error);
         });
@@ -164,7 +169,7 @@ export class Utils {
         let message = error;
 
         if (typeof error === 'string') {
-          message = JSON.parse(error);
+          error = JSON.parse(error);
         }
 
         if (error.error &&
