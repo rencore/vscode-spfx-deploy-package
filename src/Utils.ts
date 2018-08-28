@@ -14,11 +14,7 @@ export class Utils {
     return true;
   }
 
-  public static getRequestDigest(auth: Auth): Promise<string> {
-    return Utils.getRequestDigestForSite(auth.sharePointUrl as string, auth);
-  }
-
-  public static getRequestDigestForSite(siteUrl: string, auth: Auth): Promise<string> {
+  private static getRequestDigestForSite(siteUrl: string, auth: Auth): Promise<string> {
     return new Promise<string>((resolve: (requestDigest: string) => void, reject: (error: any) => void): void => {
       auth
         .getAccessToken()
@@ -46,7 +42,7 @@ export class Utils {
     });
   }
 
-  public static getTenantAppCatalogUrl(auth: Auth): Promise<string> {
+  private static getTenantAppCatalogUrl(auth: Auth): Promise<string> {
     return new Promise<string>((resolve: (tenantAppCatalogUrl: string) => void, reject: (error: any) => void): void => {
       auth
         .getAccessToken()
@@ -79,21 +75,21 @@ export class Utils {
     });
   }
 
-  private static addSolutionToCatalog(fileUri: vscode.Uri, auth: Auth, output: Output): Promise<string> {
+  private static addSolutionToCatalog(fileUri: vscode.Uri, appCatalogUrl: string, tenantAppCatalog: boolean, auth: Auth, output: Output): Promise<string> {
     return new Promise<string>((resolve: (solutionId: string) => void, reject: (error: any) => void): void => {
       let accessToken: string = '';
       auth
         .getAccessToken()
         .then((at: string): Promise<string> => {
-          output.write(`- Retrieving request digest for ${auth.sharePointUrl}...`);
+          output.write(`- Retrieving request digest for ${appCatalogUrl}...`);
           accessToken = at;
-          return Utils.getRequestDigest(auth);
+          return Utils.getRequestDigestForSite(appCatalogUrl, auth);
         })
         .then((requestDigest: string): request.RequestPromise => {
           const solutionFileName: string = path.basename(fileUri.fsPath).toLowerCase();
-          output.write(`- Adding solution ${solutionFileName} to the tenant app catalog...`);
+          output.write(`- Adding solution ${solutionFileName} to the app catalog ${appCatalogUrl}...`);
           const requestOptions: any = {
-            url: `${auth.sharePointUrl}/_api/web/tenantappcatalog/Add(overwrite=true, url='${solutionFileName}')`,
+            url: `${appCatalogUrl}/_api/web/${(tenantAppCatalog ? 'tenantappcatalog' : 'sitecollectionappcatalog')}/Add(overwrite=true, url='${solutionFileName}')`,
             headers: {
               authorization: `Bearer ${accessToken}`,
               accept: 'application/json;odata=nometadata',
@@ -118,32 +114,52 @@ export class Utils {
     });
   }
 
-  public static deploySolution(fileUri: vscode.Uri, skipFeatureDeployment: boolean, auth: Auth, output: Output): void {
+  public static deploySolution(fileUri: vscode.Uri, tenantAppCatalog: boolean, skipFeatureDeployment: boolean, auth: Auth, output: Output): void {
     output.show();
     output.write('Deploying solution package...');
     let accessToken: string = '';
-    let tenantAppCatalogUrl: string = '';
+    let appCatalogUrl: string = '';
     let solutionId: string = '';
     auth
       .getAccessToken()
-      .then((at: string): Promise<string> => {
+      .then((at: string): Promise<string> | Thenable<string | undefined> => {
         accessToken = at;
-        return Utils.addSolutionToCatalog(fileUri, auth, output);
+        if (tenantAppCatalog) {
+          return Utils.getTenantAppCatalogUrl(auth);
+        }
+        else {
+          return vscode.window.showInputBox({
+            ignoreFocusOut: true,
+            prompt: 'URL of your SharePoint site collection app catalog',
+            placeHolder: 'https://contoso.sharepoint.com/site/marketing'
+          });
+        }
+      })
+      .then((catalogUrl: string | undefined): Promise<string> => {
+        console.log(catalogUrl);
+
+        if (!catalogUrl) {
+          if (tenantAppCatalog) {
+            throw 'Unable to determine tenant app catalog URL';
+          }
+          else {
+            throw 'Please specify the URL of the site collection app catalog';
+          }
+        }
+
+        appCatalogUrl = catalogUrl;
+
+        return Utils.addSolutionToCatalog(fileUri, appCatalogUrl, tenantAppCatalog, auth, output);
       })
       .then((sid: string): Promise<string> => {
         solutionId = sid;
-        output.write('- Retrieving information about the tenant app catalog...');
-        return Utils.getTenantAppCatalogUrl(auth);
-      })
-      .then((appCatalogUrl: string): Promise<string> => {
-        tenantAppCatalogUrl = appCatalogUrl;
-        output.write(`- Retrieving request digest for ${tenantAppCatalogUrl}...`);
-        return Utils.getRequestDigestForSite(tenantAppCatalogUrl, auth);
+        output.write(`- Retrieving request digest for ${appCatalogUrl}...`);
+        return Utils.getRequestDigestForSite(appCatalogUrl, auth);
       })
       .then((requestDigest: string): request.RequestPromise => {
-        output.write(`- Deploying solution to ${skipFeatureDeployment ? 'all sites' : 'the tenant app catalog'}...`);
+        output.write(`- Deploying solution to ${skipFeatureDeployment ? 'all sites' : 'the app catalog'}...`);
         const requestOptions: any = {
-          url: `${tenantAppCatalogUrl}/_api/web/tenantappcatalog/AvailableApps/GetById('${solutionId}')/deploy`,
+          url: `${appCatalogUrl}/_api/web/${(tenantAppCatalog ? 'tenantappcatalog' : 'sitecollectionappcatalog')}/AvailableApps/GetById('${solutionId}')/deploy`,
           headers: {
             authorization: `Bearer ${accessToken}`,
             accept: 'application/json;odata=nometadata',
@@ -172,9 +188,17 @@ export class Utils {
           error = JSON.parse(error);
         }
 
-        if (error.error &&
-          error.error['odata.error']) {
-          message = error.error['odata.error'].message.value;
+        if (typeof error.error === 'string') {
+          error = JSON.parse(error.error);
+          if (error['odata.error']) {
+            message = error['odata.error'].message.value;
+          }
+        }
+        else {
+          if (error.error &&
+            error.error['odata.error']) {
+            message = error.error['odata.error'].message.value;
+          }
         }
 
         output.write(`Error: ${message}`);

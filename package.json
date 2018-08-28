@@ -2,7 +2,7 @@
   "name": "vscode-spfx-deploy-package",
   "displayName": "Rencore Deploy SPFx Package",
   "description": "Easily deploy a SharePoint Framework solution package to SharePoint Online",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "publisher": "RencoreGmbH",
   "icon": "assets/icon.png",
   "author": {
@@ -37,12 +37,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "rencoreSpfxDeploy.deploy",
-        "title": "Deploy in the app catalog..."
+        "command": "rencoreSpfxDeploy.deployTenantAppCatalog",
+        "title": "Deploy in the tenant app catalog..."
       },
       {
-        "command": "rencoreSpfxDeploy.deployGlobal",
-        "title": "Deploy to all SharePoint sites..."
+        "command": "rencoreSpfxDeploy.deployTenantAppCatalogGlobal",
+        "title": "Deploy in the tenant app catalog to all SharePoint sites..."
+      },
+      {
+        "command": "rencoreSpfxDeploy.deploySiteCollectionAppCatalog",
+        "title": "Deploy in the site collection app catalog..."
+      },
+      {
+        "command": "rencoreSpfxDeploy.deploySiteCollectionAppCatalogGlobal",
+        "title": "Deploy in the site collection app catalog to all SharePoint sites..."
       },
       {
         "command": "rencoreSpfxDeploy.status",
@@ -53,9 +61,15 @@
       "explorer/context": [
         {
           "when": "hasSppkg",
-          "command": "rencoreSpfxDeploy.deploy",
-          "alt": "rencoreSpfxDeploy.deployGlobal",
-          "group": "7_modification"
+          "command": "rencoreSpfxDeploy.deployTenantAppCatalog",
+          "alt": "rencoreSpfxDeploy.deployTenantAppCatalogGlobal",
+          "group": "7_modification@1"
+        },
+        {
+          "when": "hasSppkg",
+          "command": "rencoreSpfxDeploy.deploySiteCollectionAppCatalog",
+          "alt": "rencoreSpfxDeploy.deploySiteCollectionAppCatalogGlobal",
+          "group": "7_modification@2"
         }
       ]
     },

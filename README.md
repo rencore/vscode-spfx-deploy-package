@@ -39,6 +39,10 @@ At any time, check the status of your connection to SharePoint.
 
 ## Release Notes
 
+### 1.1.0
+
+Added support for deploying to site collection app catalogs
+
 ### 1.0.2
 
 Changed activation of the extension in case .sppkg isn't available yet
