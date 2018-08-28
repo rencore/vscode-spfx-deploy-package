@@ -39,6 +39,10 @@ At any time, check the status of your connection to SharePoint.
 
 ## Release Notes
 
+### 1.0.2
+
+Changed activation of the extension in case .sppkg isn't available yet
+
 ### 1.0.1
 
 Added handling error when app catalog can't be found

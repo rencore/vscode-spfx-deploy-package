@@ -2,7 +2,7 @@
   "name": "vscode-spfx-deploy-package",
   "displayName": "Rencore Deploy SPFx Package",
   "description": "Easily deploy a SharePoint Framework solution package to SharePoint Online",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "RencoreGmbH",
   "icon": "assets/icon.png",
   "author": {
@@ -31,7 +31,7 @@
     "Other"
   ],
   "activationEvents": [
-    "workspaceContains:**/*.sppkg"
+    "workspaceContains:**/package-solution.json"
   ],
   "main": "./out/extension",
   "contributes": {
